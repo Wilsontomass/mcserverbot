@@ -1,7 +1,8 @@
-const Discord = require('discord.js')
-const client = new Discord.Client()
+const { Client, Intents } = require('discord.js');
+const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 client.on('ready', () => {
+    console.log(`Logged in as ${client.user.tag}!`);
     // List servers the bot is connected to
     console.log("Servers:")
     client.guilds.cache.forEach((guild) => {
@@ -21,54 +22,51 @@ const request = require("request-promise");
 const config = {
     commands: {
         help: {
-            command: ".help",
+            command: "help",
             reply: "Here are my commands:"
         },
         status: {
-            command: ".status",
+            command: "status",
             messages: {
-                error: "Error getting the MC 1.17 server status...",
-                offline: "*The MC 1.17 server is currently offline*",
-                online: "The MC 1.17 server is **online**  -  ",
+                error: "Error getting the MC 1.19 server status...",
+                offline: "*The MC 1.19 server is currently offline*",
+                online: "The MC 1.19 server is **online**  -  ",
                 players: "**{online}** people are playing!",
                 noPlayers: "Nobody is playing"
             }
 
         },
         ip: {
-            command: ".ip",
-            reply: "The ip for the server: 81.229.8.57:25565"
+            command: "ip",
+            reply: "The ip for the server: 83.252.125.119:25565"
         },
         rules: {
-            command: ".rules",
-            reply: "**Server Rules:**\n-----------------------------------------------------\n1. Be nice\n2. \n3. Don't steal in general\n----------------------------------------------------"
+            command: "rules",
+            reply: "**Server Rules:**\n-----------------------------------------------------\n1. Be nice\n----------------------------------------------------"
         },
         staff: {
-            command: ".staff",
+            command: "staff",
             reply: "**Server Staff - Ask us questions!**\n----------------------------------------------------\n@Wilson#0420\n---------------------------------------------------"
         },
         howjoin: {
-            command: ".howjoin",
+            command: "howjoin",
             reply: "**How to join:**\n--------------------------------------\nif you've never played minecraft **Java Edition** before, you'll need that and java: https://www.java.com/en/download/\nThe IP is 81.229.8.57:25565\n--------------------------------------"
         },
         clear: {
-            command: ".clear",
+            command: "clear",
             secret: true
         },
         runstat: {
-            command: ".runstat",
-            secret: true
-        },
-        wilson: {
-            command: ".wilson",
+            command: "runstat",
             secret: true
         },
         whobest: {
-            command: ".who is the best",
+            command: "whoisthebest",
+            reply: "You are! <3"
         }
     },
     server: {
-        ip: "81.229.8.57", //ip for server
+        ip: "83.252.125.119", //ip for server
         port: 25565 //port
     }
 };
@@ -81,45 +79,37 @@ for (key in config.commands) {
     config.commands.help.reply = config.commands.help.reply.concat("\n", command.command);
 }
 
-// IMPORTANT: You need to run "npm install request" (without quotes) in your terminal before executing this script
 
-client.on('message', message => {
-    if (message.author == client.user) {
-        return
-    }
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isCommand()) return;
+
     for (var key in config.commands) {
         if (config.commands.hasOwnProperty(key)) {
-            if (message.content === config.commands[key].command) {
+            if (interaction.commandName === config.commands[key].command) {
                 if (config.commands[key].hasOwnProperty("reply")) {
-                    message.reply(config.commands[key].reply);
-                }
-                if (config.commands[key].hasOwnProperty("react")) {
-                    message.react(config.commands[key].react);
+                    await interaction.reply(
+                        config.commands[key].reply
+                      );
                 }
             }
         }
     }
-    if (message.content === config.commands.status.command) {
-        reply_status(message)
+    if (interaction.commandName === config.commands.status.command) {
+        reply_status(interaction)
     }
-    else if (message.content === config.commands.clear.command) {
-        clear(message.channel)
+    else if (interaction.commandName === config.commands.clear.command) {
+        clear(interaction.channel)
     }
-    else if (message.content === config.commands.runstat.command) {
-        statusupdate(message.channel);
+    else if (interaction.commandName === config.commands.runstat.command) {
+        statusupdate(interaction.channel);
     }
-    else if (message.content === config.commands.whobest.command) {
-        react_wholesome(message)
-    }
-    else if (message.content === config.commands.wilson.command) {
-        react_wilson(message)
-    }
-});
-// Credit to The MG#8238 on Discord for improvements to this script
+  });
 
-async function reply_status(message) {
-    status = await status_string_mcsrv()
-    message.reply(status)
+// IMPORTANT: You need to run "npm install request" (without quotes) in your terminal before executing this script
+
+async function reply_status(interaction) {
+    status_str = await status_string_mcsrv()
+    interaction.reply(status_str)
 }
 
 async function status_string_mcsrv() {
@@ -163,35 +153,6 @@ async function statusupdate(channel) {
     }
 }
 
-async function react_wholesome(message) {
-    try {
-		await message.react("🇾");
-		await message.react("🇴");
-		await message.react("🇺");
-        await message.react("💖");
-        await message.react("🇦");
-		await message.react("🇷");
-		await message.react("🇪");
-	} catch (error) {
-		console.error('One of the emojis failed to react.');
-        console.log(error)
-	}
-}
-
-async function react_wilson(message) {
-    try {
-		await message.react("🇼");
-		await message.react("🇮");
-		await message.react("🇱");
-        await message.react("🇸");
-		await message.react("🇴");
-		await message.react("🇳");
-	} catch (error) {
-		console.error('One of the emojis failed to react.');
-        console.log(error)
-	}
-}
-
 async function clear(channel) {
     const fetched = await channel.messages.fetch({limit: 99});
     channel.bulkDelete(fetched);
@@ -201,6 +162,4 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-bot_secret_token = ""
-
-client.login(bot_secret_token)
+client.login(process.env.TOKEN)
