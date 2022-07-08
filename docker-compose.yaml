@@ -1,0 +1,9 @@
+services:
+  bot:
+    build: .
+    secrets:
+      - .env
+
+secrets:
+  .env:
+    file: ./.env

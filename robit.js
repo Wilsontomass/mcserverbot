@@ -1,18 +1,9 @@
-const { Client, Intents } = require('discord.js');
+require('dotenv').config({ path: '/run/secrets/.env' })
+const { Client, Intents, MessageEmbed } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
-    // List servers the bot is connected to
-    console.log("Servers:")
-    client.guilds.cache.forEach((guild) => {
-        console.log(" - " + guild.name)
-
-        // List all channels
-        guild.channels.cache.forEach((channel) => {
-            console.log(` -- ${channel.name} (${channel.type}) - ${channel.id}`)
-        })
-    })
 
     client.user.setActivity("Minecraft")
 })
@@ -98,10 +89,11 @@ client.on('interactionCreate', async (interaction) => {
         reply_status(interaction)
     }
     else if (interaction.commandName === config.commands.clear.command) {
-        clear(interaction.channel)
+        clear(interaction.channelId)
     }
     else if (interaction.commandName === config.commands.runstat.command) {
-        statusupdate(interaction.channel);
+        await interaction.reply({ content: 'Runnning auto stats!', ephemeral: true })
+        statusupdate(interaction.channelId);
     }
   });
 
@@ -129,17 +121,24 @@ async function status_string_mcsrv() {
     return status;
 }
 
-async function statusupdate(channel) {
-    const statusEmbed = new Discord.MessageEmbed()
+
+async function getembed() {
+    return new MessageEmbed()
 	.setColor('#0099ff')
 	.setTitle('Server Status')
 	.setDescription('Not initialised properly')
 	.setThumbnail('https://upload.wikimedia.org/wikipedia/en/5/51/Minecraft_cover.png')
 	.setTimestamp()
-    var statusChannel = channel // Replace with known channel ID
+}
+
+async function statusupdate(channel_id) {
+    var statusEmbed = await getembed()
+    console.log(channel_id)
+    var statusChannel = await client.channels.fetch(channel_id)
     var st_string = await status_string_mcsrv()
-    status = statusEmbed.setDescription(st_string)
-    var last_msg = await statusChannel.send(status)
+    status_embed = statusEmbed.setDescription(st_string)
+    var last_msg = await statusChannel.send({ embeds: [status_embed]})
+
     while (true) {
         console.log("running stat");
         await sleep(400000)
@@ -148,8 +147,9 @@ async function statusupdate(channel) {
         } catch(err) {
             console.log(err)
         }
-        status = statusEmbed.setDescription(st_string).setTimestamp()
-        last_msg.edit(status)
+        statusEmbed = await getembed()
+        status_embed = statusEmbed.setDescription(st_string).setTimestamp()
+        last_msg.edit({ embeds: [status_embed]})
     }
 }
 

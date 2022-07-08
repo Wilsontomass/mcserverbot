@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({ path: '/run/secrets/.env' })
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v10');
 const commands = [

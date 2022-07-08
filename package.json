@@ -7,11 +7,13 @@
     "discord-api-types": "^0.36.1",
     "discord.js": "^13.8.1",
     "dotenv": "^16.0.1",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "register": "node -r dotenv/config register.js"
+    "register": "node -r dotenv/config register.js",
+    "start": "node -r dotenv/config robit.js"
   },
   "repository": {
     "type": "git",
