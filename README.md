@@ -8,13 +8,14 @@ Its main functionality is to create an embed that the bot will edit every 5 minu
 This is not particularly well designed, so to get it working probably will take long enough that by the end you will be able to create your own. But, roughly:
 1. Install prerequisites: node, docker and docker-compose 
 2. Create a discord bot using the [discord developer portal](https://discord.com/login?redirect_to=%2Fdevelopers%2Fapplications)
-4. Clone this repo, 
-5. run `npm install`
-6. create a file named `.env` and add your discord bot token and app id
+3. Clone this repo, 
+4. run `npm install`
+5. create a file named `.env` and add your discord bot token and app id
     ```
     APP_ID=
     TOKEN=
     ```
+6. Run `npm register`. This will register all the slash comands with discord.
 7. run `docker compose up`
 
 # How to use
